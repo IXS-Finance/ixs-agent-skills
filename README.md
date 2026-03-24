@@ -1,6 +1,10 @@
 # IXS Agent Skills
 
-Agent skills for working with IXS vault workflows, starting with the public ERC-4626 vault flow.
+![License](https://img.shields.io/badge/license-MIT-green)
+![Skills](https://img.shields.io/badge/skills-9-blue)
+![Network](https://img.shields.io/badge/network-Base%20Sepolia-0052FF)
+
+Agent skills for working with the IXS ERC-4626 vault flow.
 
 ## What this is
 
@@ -10,19 +14,42 @@ Each skill lives in [`skills/`](./skills) as its own folder. The entrypoint is `
 
 The repo is designed to work with Codex/OpenAI-compatible local skill folders, OpenClaw-style installs, and similar runtimes that load skills from the filesystem.
 
+## Why this exists
+
+Vault interactions look simple on paper, but safe agent execution still needs structure:
+
+- agents need deterministic sequences for read-only checks, approvals, and execution
+- ERC-20 allowance and balance checks are easy to skip or muddle
+- quote and intent data should be treated as planning inputs, not invented by the agent
+- integrators need reusable vault workflows instead of rebuilding the same prompt logic per runtime
+
+## Safety
+
+- Read-only skills do not move funds.
+- Transaction-capable skills should only execute when the caller explicitly chooses execute mode.
+- Skills in this repo are workflow guardrails, not financial advice.
+
 ## Coverage
 
-Current coverage includes:
+Current coverage is grouped by intent.
 
-- vault inspection and wallet position checks
-- deposit quoting
-- redeem quoting
-- allowance checks
-- approval planning and execution
-- deposit planning and execution
-- redeem planning and execution
-- wallet history review
-- entry-versus-exit comparison
+### Research
+
+- `inspect-vault`
+- `review-vault-wallet-history`
+- `compare-vault-entry-vs-exit`
+
+### Preflight
+
+- `quote-vault-deposit`
+- `quote-vault-redeem`
+- `check-vault-allowance`
+
+### Actions
+
+- `approve-vault-spender`
+- `deposit-into-vault`
+- `redeem-from-vault`
 
 ## Skills
 
@@ -33,10 +60,21 @@ Current coverage includes:
 | `quote-vault-redeem` | Preview redeem asset output, fees, and redeem limits without executing a transaction. |
 | `check-vault-allowance` | Inspect whether the wallet has enough ERC-20 allowance for a target deposit. |
 | `approve-vault-spender` | Plan or execute the ERC-20 approval step for an ERC-4626 vault deposit. |
-| `deposit-into-vault` | Plan or execute a vault deposit using the public API flow. |
-| `redeem-from-vault` | Plan or execute a vault redeem using the public API flow. |
+| `deposit-into-vault` | Plan or execute a vault deposit using the public API quote and intent flow. |
+| `redeem-from-vault` | Plan or execute a vault redeem using the public API quote and intent flow. |
 | `review-vault-wallet-history` | Summarize a wallet's recent vault deposit and redeem activity. |
 | `compare-vault-entry-vs-exit` | Compare deposit and redeem conditions for a wallet before acting. |
+
+## Quickstart
+
+1. Clone this repository.
+2. Copy or symlink one or more skill folders from [`skills/`](./skills) into your runtime's skills directory.
+3. Fill in [`.env.example`](./.env.example) values for your environment.
+4. Reload the runtime.
+5. Start with a read-only flow:
+   - `inspect-vault`
+   - `quote-vault-deposit`
+   - `check-vault-allowance`
 
 ## Using these skills
 
@@ -48,15 +86,25 @@ To use this hub:
 4. Set the environment variables required by the chosen skill.
 5. Start a new session or reload the runtime so it picks up the skills.
 
+For API-driven skills, set `IXS_API_BASE_URL` and `IXS_VAULT_ID`.
+For direct contract-read and execution skills, set the vault address, asset address, chain id, and Base Sepolia RPC URL.
+
 Install details:
 
 - [`docs/installation/codex.md`](./docs/installation/codex.md)
 - [`docs/installation/openclaw.md`](./docs/installation/openclaw.md)
 - [`docs/installation/generic-local.md`](./docs/installation/generic-local.md)
+- [`docs/integrator-notes.md`](./docs/integrator-notes.md)
 
 Security guidance:
 
 - [`docs/security-guidelines.md`](./docs/security-guidelines.md)
+
+## End-to-end example
+
+For a minimal ERC-4626 vault flow, see:
+
+- [`examples/erc4626-happy-path.md`](./examples/erc4626-happy-path.md)
 
 ## Skill format
 
@@ -80,6 +128,7 @@ Contributor docs:
 Examples:
 
 - [`examples/local-install.md`](./examples/local-install.md)
+- [`examples/erc4626-happy-path.md`](./examples/erc4626-happy-path.md)
 - [`examples/skill-index-example.md`](./examples/skill-index-example.md)
 
 ## Validation

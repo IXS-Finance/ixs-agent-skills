@@ -29,6 +29,7 @@ jobs:
           repo = Path(".")
           skills_dir = repo / "skills"
           required_docs = [
+              repo / ".env.example",
               repo / "README.md",
               repo / "docs" / "installation" / "codex.md",
               repo / "docs" / "installation" / "openclaw.md",
@@ -36,6 +37,7 @@ jobs:
               repo / "docs" / "adding-a-skill.md",
               repo / "docs" / "skill-authoring-guidelines.md",
               repo / "docs" / "governance.md",
+              repo / "docs" / "integrator-notes.md",
           ]
 
           errors = []
