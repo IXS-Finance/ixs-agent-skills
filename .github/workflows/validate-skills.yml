@@ -1,0 +1,119 @@
+name: Validate Skills
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate repository contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          repo = Path(".")
+          skills_dir = repo / "skills"
+          required_docs = [
+              repo / "README.md",
+              repo / "docs" / "installation" / "codex.md",
+              repo / "docs" / "installation" / "openclaw.md",
+              repo / "docs" / "installation" / "generic-local.md",
+              repo / "docs" / "adding-a-skill.md",
+              repo / "docs" / "skill-authoring-guidelines.md",
+              repo / "docs" / "governance.md",
+          ]
+
+          errors = []
+
+          for path in required_docs:
+              if not path.exists():
+                  errors.append(f"Missing required documentation file: {path}")
+
+          if not skills_dir.exists():
+              errors.append("Missing skills/ directory")
+
+          slug_pattern = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+          required_fields = ["name", "description", "owner", "status", "version"]
+          allowed_statuses = {"draft", "active", "deprecated"}
+          seen_names = {}
+
+          for skill_dir in sorted([p for p in skills_dir.iterdir() if p.is_dir()]):
+              slug = skill_dir.name
+              if not slug_pattern.match(slug):
+                  errors.append(f"Invalid skill slug '{slug}': must be lowercase hyphen-case")
+
+              skill_md = skill_dir / "SKILL.md"
+              if not skill_md.exists():
+                  errors.append(f"Missing SKILL.md in {skill_dir}")
+                  continue
+
+              text = skill_md.read_text(encoding="utf-8")
+              if not text.startswith("---\n"):
+                  errors.append(f"{skill_md} is missing YAML frontmatter")
+                  continue
+
+              try:
+                  _, frontmatter, _ = text.split("---\n", 2)
+              except ValueError:
+                  errors.append(f"{skill_md} has malformed YAML frontmatter")
+                  continue
+
+              metadata = {}
+              current_list_key = None
+              for raw_line in frontmatter.splitlines():
+                  if not raw_line.strip():
+                      current_list_key = None
+                      continue
+                  if raw_line.startswith("  - ") and current_list_key:
+                      metadata.setdefault(current_list_key, []).append(raw_line[4:].strip())
+                      continue
+                  if ":" not in raw_line:
+                      current_list_key = None
+                      continue
+                  key, value = raw_line.split(":", 1)
+                  key = key.strip()
+                  value = value.strip()
+                  if value:
+                      metadata[key] = value
+                      current_list_key = None
+                  else:
+                      metadata[key] = []
+                      current_list_key = key
+
+              for field in required_fields:
+                  if field not in metadata or metadata[field] in ("", []):
+                      errors.append(f"{skill_md} is missing required metadata field '{field}'")
+
+              name = metadata.get("name")
+              status = metadata.get("status")
+              if status and status not in allowed_statuses:
+                  errors.append(f"{skill_md} has invalid status '{status}'")
+
+              if name:
+                  if name in seen_names:
+                      errors.append(f"Duplicate skill name '{name}' in {skill_md} and {seen_names[name]}")
+                  else:
+                      seen_names[name] = skill_md
+
+          if errors:
+              for error in errors:
+                  print(error)
+              sys.exit(1)
+
+          print("Skill repository contract validation passed.")
+          PY
