@@ -54,6 +54,10 @@ Install details:
 - [`docs/installation/openclaw.md`](./docs/installation/openclaw.md)
 - [`docs/installation/generic-local.md`](./docs/installation/generic-local.md)
 
+Security guidance:
+
+- [`docs/security-guidelines.md`](./docs/security-guidelines.md)
+
 ## Skill format
 
 Each skill folder includes:
@@ -71,6 +75,7 @@ Contributor docs:
 - [`docs/adding-a-skill.md`](./docs/adding-a-skill.md)
 - [`docs/skill-authoring-guidelines.md`](./docs/skill-authoring-guidelines.md)
 - [`docs/governance.md`](./docs/governance.md)
+- [`docs/security-guidelines.md`](./docs/security-guidelines.md)
 
 Examples:
 
