@@ -3,7 +3,7 @@ name: deposit-into-vault
 description: Plan or execute a deposit into a public IXS tokenized vault using quote and intent API endpoints.
 owner: IXS Protocol
 status: active
-version: 1.0.0
+version: 1.0.1
 tags:
   - vaults
   - defi
@@ -13,7 +13,7 @@ tools:
   - openclaw
 repo_scope:
   - public-vault-api
-last_reviewed: 2026-03-24
+last_reviewed: 2026-03-25
 ---
 
 # Deposit Into Vault
@@ -26,7 +26,7 @@ Use this skill to plan or execute a deposit into the public IXS tokenized vault 
 
 - `IXS_API_BASE_URL`
 - `IXS_VAULT_ID`
-- wallet from `AGENT_PRIVATE_KEY`
+- wallet from an approved signer; use `AGENT_PRIVATE_KEY` only for isolated test or compatibility setups
 - `AGENT_DEPOSIT_ASSET_AMOUNT`
 - `AGENT_MIN_ASSET_BALANCE_TO_DEPOSIT`
 - `--execute` to actually send transactions

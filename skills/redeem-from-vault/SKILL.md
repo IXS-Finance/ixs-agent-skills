@@ -3,7 +3,7 @@ name: redeem-from-vault
 description: Plan or execute a redeem from a public IXS tokenized vault using quote and intent API endpoints.
 owner: IXS Protocol
 status: active
-version: 1.0.0
+version: 1.0.1
 tags:
   - vaults
   - defi
@@ -13,7 +13,7 @@ tools:
   - openclaw
 repo_scope:
   - public-vault-api
-last_reviewed: 2026-03-24
+last_reviewed: 2026-03-25
 ---
 
 # Redeem From Vault
@@ -26,7 +26,7 @@ Use this skill to plan or execute a redeem from the public IXS tokenized vault u
 
 - `IXS_API_BASE_URL`
 - `IXS_VAULT_ID`
-- wallet from `AGENT_PRIVATE_KEY`
+- wallet from an approved signer; use `AGENT_PRIVATE_KEY` only for isolated test or compatibility setups
 - `AGENT_REDEEM_SHARE_AMOUNT`
 - `AGENT_MIN_SHARE_BALANCE_TO_REDEEM`
 - `--execute` to actually send transactions

@@ -99,6 +99,8 @@ Install details:
 Security guidance:
 
 - [`docs/security-guidelines.md`](./docs/security-guidelines.md)
+- [`docs/wallet-private-key-security.md`](./docs/wallet-private-key-security.md)
+- [`docs/local-sandbox-wallet-quickstart.md`](./docs/local-sandbox-wallet-quickstart.md)
 
 ## End-to-end example
 

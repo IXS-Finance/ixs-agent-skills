@@ -11,6 +11,7 @@ A compatible runtime should be able to:
 - provide environment variables to the agent
 - make HTTP requests to `ixs-api` when a skill depends on API endpoints
 - sign and broadcast EVM transactions when a skill is used in execute mode
+- provide signer capabilities and wallet address without requiring raw private-key access inside the skill prompt
 
 ## Read-Only Versus Execute Mode
 
@@ -59,12 +60,35 @@ Integrators should keep those surfaces distinct in their runtime:
 
 ## Wallet Safety
 
+For a focused signer policy, see [`docs/wallet-private-key-security.md`](./wallet-private-key-security.md).
+
 Recommended runtime behavior:
 
 - require an explicit execute flag or separate approval step before any on-chain action
 - surface spender, vault, chain, and amount before signing
+- enforce human confirmation or signer policy in the runtime orchestration layer, not only in skill text
 - re-read allowance or balances after approval when the workflow requires it
 - fail closed on API or RPC errors
+- prefer external wallet connectors or signer services over raw `AGENT_PRIVATE_KEY`
+- if `AGENT_PRIVATE_KEY` is supported, inject it only through secret management, never through chat or prompt text
+- keep signer-enabled runtimes separate from read-only runtimes
+- mask secrets in logs, traces, and crash output
+- refuse to sign for unapproved chains, hosts, or contracts even when a key is loaded
+
+Recommended signer capability surface:
+
+- `signer_address`
+- `signer_type`
+- `signer_mode`
+- `approved_chains`
+- optional `approved_contracts`
+- optional `approved_methods`
+- `requires_human_confirmation`
+- `policy_id` or equivalent audit reference
+
+Runtimes may expose those capabilities through environment variables, session state, MCP tools, SDK injection, or policy tokens. The important part is that skills receive signer scope and wallet context without needing raw key material in the prompt surface.
+
+When a skill can return unsigned transaction payloads, intent data, or execution plans, prefer that pattern over having the skill directly sign and broadcast.
 
 ## History Caveat
 

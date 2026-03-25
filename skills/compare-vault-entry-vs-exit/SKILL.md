@@ -3,7 +3,7 @@ name: compare-vault-entry-vs-exit
 description: Compare deposit and redeem conditions for a wallet on a public IXS ERC-4626 vault before taking action.
 owner: IXS Protocol
 status: active
-version: 1.0.0
+version: 1.0.1
 tags:
   - vaults
   - analysis
@@ -13,7 +13,7 @@ tools:
   - openclaw
 repo_scope:
   - public-erc4626-vault
-last_reviewed: 2026-03-24
+last_reviewed: 2026-03-25
 ---
 
 # Compare Vault Entry Vs Exit
@@ -26,7 +26,7 @@ Use this skill when the user wants to compare deposit and redeem conditions befo
 
 - `IXS_VAULT_ADDRESS`
 - `IXS_VAULT_CHAIN_ID`
-- wallet from `AGENT_PRIVATE_KEY`
+- wallet from an approved signer; use `AGENT_PRIVATE_KEY` only for isolated test or compatibility setups
 - target deposit asset amount
 - target redeem share amount
 

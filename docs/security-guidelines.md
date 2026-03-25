@@ -4,6 +4,8 @@
 
 This repository contains agent skills for inspecting vaults, checking allowances, previewing deposit and redeem flows, and in some cases executing on-chain actions. Because these skills can influence wallet behavior, they should be treated as privileged operational logic rather than ordinary prompt snippets.
 
+For focused signer and wallet-secret guidance, see [`docs/wallet-private-key-security.md`](./wallet-private-key-security.md).
+
 This guide is written for two audiences:
 
 - end users who want to run these skills safely
@@ -60,7 +62,9 @@ If you use or build on these skills, follow these rules:
 If your agent can approve, deposit, redeem, or otherwise write state:
 
 - Default to plan mode, not execute mode.
-- Require an explicit confirmation step immediately before signing.
+- Classify the agent as either interactive or policy-bound autonomous.
+- Require an explicit confirmation step immediately before signing for interactive agents.
+- Prefer runtime-enforced confirmation over skill-level interactive pauses.
 - Show a normalized pre-sign summary:
   - chain ID
   - target contract
@@ -68,6 +72,8 @@ If your agent can approve, deposit, redeem, or otherwise write state:
   - spender or recipient
   - expected action
 - Reject execution when the transaction target, selector, amount, or network cannot be independently verified.
+- For policy-bound autonomous agents, enforce approved chains, contracts, methods, and spend bounds without fallback to prompt-only checks.
+- For dynamic autonomous sizing, pair signer policy with contract-level controls such as scoped allowances or strategy-specific guard contracts.
 - Log enough detail for a user to audit what the agent attempted.
 
 ### Safe transaction construction
@@ -78,12 +84,17 @@ If your agent can approve, deposit, redeem, or otherwise write state:
 - Verify the chain matches the configured network.
 - Treat any configurable API base URL as untrusted unless it is pinned to an approved HTTPS host.
 
-### Safe secret handling
+### Wallet and signer handling
 
-- Do not assume `AGENT_PRIVATE_KEY` is an acceptable default for all deployments.
-- Prefer wallet connectors, signer services, or approval-based execution flows when available.
-- If you must support raw private keys, document the blast radius clearly and require isolated usage.
-- Never print secrets, derived keys, or sensitive wallet material into logs.
+Keep the detailed wallet-secret policy in [`docs/wallet-private-key-security.md`](./wallet-private-key-security.md) and the local dev exception path in [`docs/local-sandbox-wallet-quickstart.md`](./local-sandbox-wallet-quickstart.md).
+
+At a minimum:
+
+- do not assume `AGENT_PRIVATE_KEY` is an acceptable default for all deployments
+- prefer wallet connectors or managed signer services over raw private keys
+- never ask users to paste secrets into chat or prompt text
+- never print secrets, derived keys, or sensitive wallet material into logs
+- document the signer model, blast radius, and confirmation or policy controls for every execute-capable agent
 
 ### Publication and review requirements
 
@@ -118,6 +129,8 @@ The deposit and redeem skills currently instruct runtimes to fetch quote and int
 
 If you build on these skills, add an independent verification layer before any signing step. A compromised API, wrong base URL, or prompt-level misconfiguration should not be able to redirect user funds.
 
+Where possible, have the skill produce unsigned transaction payloads or intent data and let the runtime own final confirmation, signing, and broadcast.
+
 ### Approval flows
 
 The approval skill correctly separates planning from execution, but approvals remain high-risk because they expand another contract's ability to move assets:
@@ -129,13 +142,18 @@ Builders should add explicit spender verification and end users should prefer mi
 
 ### Private-key-driven wallet context
 
-Several skills assume wallet context from `AGENT_PRIVATE_KEY`:
+Several skills support wallet context via `AGENT_PRIVATE_KEY`:
 
 - [skills/deposit-into-vault/SKILL.md](../skills/deposit-into-vault/SKILL.md#L29)
 - [skills/redeem-from-vault/SKILL.md](../skills/redeem-from-vault/SKILL.md#L29)
 - [skills/approve-vault-spender/SKILL.md](../skills/approve-vault-spender/SKILL.md#L30)
 
-That may be acceptable for isolated testing, but public-facing agents should prefer stronger signer isolation and clearer key-management guidance.
+That may be acceptable for isolated testing, but builders should make the deployment stance explicit:
+
+- acceptable: local development, disposable test wallets, isolated single-user sandboxes
+- not acceptable: shared chat agents, public-facing assistants, team wallets, or production treasury operations
+
+If you keep `AGENT_PRIVATE_KEY` support for compatibility, document it as an unsafe-by-default fallback and pair it with an approved-signer alternative.
 
 ### Current governance gap
 
@@ -154,7 +172,9 @@ Use this checklist before publishing an agent built on this repo:
 
 - The agent has a read-only default mode.
 - Every execute path has a pre-sign verification step.
-- Every execute path requires explicit human confirmation.
+- Every interactive execute path requires explicit human confirmation.
+- Every policy-bound autonomous path has enforced chain, contract, method, and spend policy.
+- The signer policy follows [`docs/wallet-private-key-security.md`](./wallet-private-key-security.md).
 - Approved hosts and supported chains are documented and enforced.
 - Approval flows are bounded and explain spender risk clearly.
 - Secrets are isolated from general-purpose chat sessions.
