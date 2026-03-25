@@ -3,7 +3,7 @@ name: quote-vault-deposit
 description: Preview the expected share output and current deposit limits for a public IXS ERC-4626 vault without executing a transaction.
 owner: IXS Protocol
 status: active
-version: 1.0.0
+version: 1.0.1
 tags:
   - vaults
   - erc4626
@@ -13,7 +13,7 @@ tools:
   - openclaw
 repo_scope:
   - public-erc4626-vault
-last_reviewed: 2026-03-24
+last_reviewed: 2026-03-25
 ---
 
 # Quote Vault Deposit
@@ -27,7 +27,7 @@ Use this skill when the user wants to preview deposit outcomes before approving 
 - `IXS_VAULT_ADDRESS`
 - `IXS_VAULT_CHAIN_ID`
 - target deposit asset amount
-- optional wallet from `AGENT_PRIVATE_KEY` if wallet-specific limits are needed
+- optional wallet from an approved signer; use `AGENT_PRIVATE_KEY` only for isolated test or compatibility setups when wallet-specific limits are needed
 
 ## Trigger Examples
 

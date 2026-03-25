@@ -3,7 +3,7 @@ name: check-vault-allowance
 description: Inspect a wallet's ERC-20 allowance to the vault and determine whether approval is required for a target deposit amount.
 owner: IXS Protocol
 status: active
-version: 1.0.0
+version: 1.0.1
 tags:
   - vaults
   - erc20
@@ -14,7 +14,7 @@ tools:
 repo_scope:
   - public-erc20
   - public-erc4626-vault
-last_reviewed: 2026-03-24
+last_reviewed: 2026-03-25
 ---
 
 # Check Vault Allowance
@@ -27,7 +27,7 @@ Use this skill before deposit planning or execution to determine whether the wal
 
 - `IXS_VAULT_ADDRESS`
 - asset token address
-- wallet from `AGENT_PRIVATE_KEY`
+- wallet from an approved signer; use `AGENT_PRIVATE_KEY` only for isolated test or compatibility setups
 - target deposit asset amount
 
 ## Trigger Examples

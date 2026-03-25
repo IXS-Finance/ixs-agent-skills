@@ -3,7 +3,7 @@ name: inspect-vault
 description: Inspect a public IXS tokenized vault and the current wallet position before making an investment decision.
 owner: IXS Protocol
 status: active
-version: 1.0.0
+version: 1.0.1
 tags:
   - vaults
   - defi
@@ -13,7 +13,7 @@ tools:
   - openclaw
 repo_scope:
   - public-vault-api
-last_reviewed: 2026-03-24
+last_reviewed: 2026-03-25
 ---
 
 # Inspect Vault
@@ -26,7 +26,7 @@ Use this skill to inspect a public IXS tokenized vault and the current wallet po
 
 - `IXS_API_BASE_URL`
 - `IXS_VAULT_ID`
-- wallet from `AGENT_PRIVATE_KEY`
+- wallet from an approved signer; use `AGENT_PRIVATE_KEY` only for isolated test or compatibility setups
 
 ## Trigger Examples
 

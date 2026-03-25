@@ -69,6 +69,18 @@ Keep the body short and operational. Use this order when possible:
 - avoid tool-specific assumptions unless the skill is intentionally runtime-specific
 - if the skill depends on another repo, name that repo explicitly
 
+## Secrets And Signers
+
+For the full runtime-facing policy, see [`docs/wallet-private-key-security.md`](./wallet-private-key-security.md).
+
+When a skill can read wallet context or execute transactions:
+
+- prefer neutral wording such as "wallet from approved signer" instead of making `AGENT_PRIVATE_KEY` sound like the default
+- if raw private-key support exists, label it as isolated-test or compatibility-only usage
+- never instruct users to paste secrets into chat, prompt text, `SKILL.md`, or examples
+- document the pre-sign checks, confirmation step, and signer blast radius in the skill or its references
+- point readers to [`docs/security-guidelines.md`](./security-guidelines.md) when the skill can execute
+
 ## Trigger Quality
 
 Good trigger examples are:

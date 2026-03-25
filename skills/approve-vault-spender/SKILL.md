@@ -3,7 +3,7 @@ name: approve-vault-spender
 description: Plan or execute the ERC-20 approval step required before depositing into a public IXS ERC-4626 vault.
 owner: IXS Protocol
 status: active
-version: 1.0.0
+version: 1.0.1
 tags:
   - vaults
   - erc20
@@ -14,7 +14,7 @@ tools:
 repo_scope:
   - public-erc20
   - public-erc4626-vault
-last_reviewed: 2026-03-24
+last_reviewed: 2026-03-25
 ---
 
 # Approve Vault Spender
@@ -27,7 +27,7 @@ Use this skill when a deposit requires an ERC-20 approval step before the vault 
 
 - asset token address
 - `IXS_VAULT_ADDRESS`
-- wallet from `AGENT_PRIVATE_KEY`
+- wallet from an approved signer; use `AGENT_PRIVATE_KEY` only for isolated test or compatibility setups
 - target approval amount
 - `--execute` to actually send the approval transaction
 
