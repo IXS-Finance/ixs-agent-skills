@@ -3,17 +3,19 @@ name: quote-vault-deposit
 description: Preview the expected share output and current deposit limits for a public IXS ERC-4626 vault without executing a transaction.
 owner: IXS Protocol
 status: active
-version: 1.0.1
+version: 1.1.0
 tags:
   - vaults
   - erc4626
   - quote
+  - mcp
 tools:
   - codex
   - openclaw
 repo_scope:
   - public-erc4626-vault
-last_reviewed: 2026-03-25
+  - public-vault-mcp
+last_reviewed: 2026-07-23
 ---
 
 # Quote Vault Deposit
@@ -24,6 +26,7 @@ Use this skill when the user wants to preview deposit outcomes before approving 
 
 ## Inputs
 
+- `IXS_MCP_URL`
 - `IXS_VAULT_ADDRESS`
 - `IXS_VAULT_CHAIN_ID`
 - target deposit asset amount
@@ -36,21 +39,23 @@ Use this skill when the user wants to preview deposit outcomes before approving 
 
 ## Procedure
 
-1. Read `asset()`, `paused()`, `totalAssets()`, and `availableAssets()` from the vault.
-2. Read `maxDeposit(receiver)` for the target wallet if available.
-3. Read `previewDeposit(assets)` for the requested asset amount.
-4. Summarize:
+1. Call the MCP tool `vault_get` (or otherwise determine settlement kind) before reading anything else — `sync` (`ManagedVault`-kind) and `async-erc7540` (`ERC7540OperatedVault`-kind) vaults must be summarized differently in step 4.
+2. Read `asset()`, `paused()`, `totalAssets()`, and `availableAssets()` from the vault.
+3. Read `maxDeposit(receiver)` for the target wallet if available.
+4. Read `previewDeposit(assets)` for the requested asset amount.
+5. Summarize:
    - paused state
    - requested asset amount
    - expected shares out
    - current max deposit
    - total and available assets
-5. If the requested amount exceeds the current limit, say so clearly.
+6. If the requested amount exceeds the current limit, say so clearly — except on `async-erc7540` vaults, where `maxDeposit` always returns `0` by design (the synchronous path is disabled; deposits only go through `requestDeposit`). Do not report that as "deposit blocked" — say instead that this vault only accepts deposits via the async request/claim flow (`deposit-into-vault`).
 
 ## Guardrails
 
 - Do not present a quote as a guaranteed execution result.
 - Do not treat `previewDeposit` as proof that the wallet has enough balance or allowance.
+- On `async-erc7540` vaults, `previewDeposit` is an explicitly non-binding estimate at the current indicative price — the real conversion is priced when the request is finalized, which can differ from this quote. Say so; do not present it with the same confidence as a sync-vault quote.
 - Stop if the vault read calls fail.
 
 ## References

@@ -4,6 +4,7 @@ This is the simplest end-to-end flow for an agent runtime integrating the public
 
 ## Inputs
 
+- `IXS_MCP_URL=https://api-dev-v2.ixs.finance/mcp`
 - `IXS_VAULT_ID=ixs-tokenized-vault-base-sepolia`
 - `IXS_VAULT_CHAIN_ID=84532`
 - `IXS_VAULT_ADDRESS=0x9421a6C925D466Ac22956B1a7D553c3E74F59571`
@@ -13,7 +14,7 @@ This is the simplest end-to-end flow for an agent runtime integrating the public
 ## Flow
 
 1. Run `inspect-vault`
-   - confirm paused state, total assets, available assets, and wallet balances
+   - confirm settlement kind, paused state, total assets, available assets, and wallet balances
 2. Run `quote-vault-deposit`
    - estimate expected shares for the target asset amount
 3. Run `check-vault-allowance`
@@ -22,6 +23,7 @@ This is the simplest end-to-end flow for an agent runtime integrating the public
    - approve the target amount to the vault
 5. Run `deposit-into-vault --execute`
    - send the returned transaction steps in order
+   - if settlement came back `async-erc7540`, wait for the request to become claimable and run the claim step before treating the deposit as done
 6. Run `review-vault-wallet-history`
    - confirm the new activity is reflected in the wallet feed
 

@@ -20,7 +20,7 @@ Vault interactions look simple on paper, but safe agent execution still needs st
 
 - agents need deterministic sequences for read-only checks, approvals, and execution
 - ERC-20 allowance and balance checks are easy to skip or muddle
-- quote and intent data should be treated as planning inputs, not invented by the agent
+- MCP tool responses (unsigned calldata, settlement state) should be treated as planning inputs, not invented by the agent
 - integrators need reusable vault workflows instead of rebuilding the same prompt logic per runtime
 
 ## Safety
@@ -60,8 +60,8 @@ Current coverage is grouped by intent.
 | `quote-vault-redeem` | Preview redeem asset output, fees, and redeem limits without executing a transaction. |
 | `check-vault-allowance` | Inspect whether the wallet has enough ERC-20 allowance for a target deposit. |
 | `approve-vault-spender` | Plan or execute the ERC-20 approval step for an ERC-4626 vault deposit. |
-| `deposit-into-vault` | Plan or execute a vault deposit using the public API quote and intent flow. |
-| `redeem-from-vault` | Plan or execute a vault redeem using the public API quote and intent flow. |
+| `deposit-into-vault` | Plan or execute a vault deposit via MCP tool calls, including the async claim step where required. |
+| `redeem-from-vault` | Plan or execute a vault redeem via MCP tool calls, including the async claim step where required. |
 | `review-vault-wallet-history` | Summarize a wallet's recent vault deposit and redeem activity. |
 | `compare-vault-entry-vs-exit` | Compare deposit and redeem conditions for a wallet before acting. |
 
@@ -86,7 +86,7 @@ To use this hub:
 4. Set the environment variables required by the chosen skill.
 5. Start a new session or reload the runtime so it picks up the skills.
 
-For API-driven skills, set `IXS_API_BASE_URL` and `IXS_VAULT_ID`.
+For MCP-driven skills (`inspect-vault`, `deposit-into-vault`, `redeem-from-vault`), set `IXS_MCP_URL`, `IXS_API_BASE_URL`, and `IXS_VAULT_ID`.
 For direct contract-read and execution skills, set the vault address, asset address, chain id, and Base Sepolia RPC URL.
 
 Install details:
