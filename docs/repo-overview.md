@@ -1,6 +1,6 @@
 # Repo Overview
 
-`ixs-agent-skills` is a public repository of reusable agent skills for IXS engineering, product, and operational workflows.
+`ixs-rwa-agent-skills` is a public repository of reusable agent skills for IXS engineering, product, and operational workflows.
 
 ## Design Goals
 

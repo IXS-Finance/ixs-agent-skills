@@ -1,6 +1,6 @@
 # Integrator Notes
 
-This repo is meant for agent runtimes that can load local skill folders and execute a mix of read-only calls, API calls, and wallet-backed EVM transactions.
+This repo is meant for agent runtimes that can load local skill folders and execute a mix of read-only calls, MCP tool calls, API calls, and wallet-backed EVM transactions.
 
 ## Runtime Expectations
 
@@ -9,7 +9,8 @@ A compatible runtime should be able to:
 - discover skills from a filesystem path
 - treat `SKILL.md` as the skill entrypoint
 - provide environment variables to the agent
-- make HTTP requests to `ixs-api` when a skill depends on API endpoints
+- call MCP tools over `POST /mcp` (JSON-RPC over Streamable HTTP) when a skill needs to build a transaction
+- make HTTP requests to `ixs-api`'s discovery-only REST surface (`GET /vaults`, `GET /vaults/{vaultId}`, `GET /vaults/{vaultId}/positions/{wallet}`) when a skill depends on those endpoints
 - sign and broadcast EVM transactions when a skill is used in execute mode
 - provide signer capabilities and wallet address without requiring raw private-key access inside the skill prompt
 
@@ -49,14 +50,17 @@ These values are grounded in the current IXS codebase and were verified against 
 
 This repo contains two execution surfaces:
 
-- API-driven vault flows that use `ixs-api` quote and intent endpoints
-- ERC-4626 read and wallet flows based on on-chain contract reads and transactions
+- MCP tool calls (`vault_get`, `vault_build_request_deposit`, `vault_build_request_redeem`, `vault_build_claim_deposit`, `vault_build_claim_redeem`, `vault_request_status`) for anything that builds a transaction or needs settlement-kind-aware logic
+- ERC-4626 read and wallet flows based on direct on-chain contract reads and transactions (quoting, allowance, approval)
+
+`ixs-api`'s REST surface is discovery-only: `GET /vaults`, `GET /vaults/{vaultId}`, and `GET /vaults/{vaultId}/positions/{wallet}`. It does not expose quote or intent-building endpoints — `quote-*` and `intents/*` routes were removed. Any skill that needs to build a deposit, redeem, or claim transaction must go through MCP.
 
 Integrators should keep those surfaces distinct in their runtime:
 
 - read-only contract calls should be cheap and repeatable
-- API quote and intent calls should be treated as ephemeral planning data
-- transaction execution should use the exact returned intent steps or exact contract calldata the skill describes
+- MCP tool responses should be treated as ephemeral planning data, not cached across calls
+- transaction execution should use the exact returned MCP tool steps or exact contract calldata the skill describes
+- always check `settlement` (`sync`, `queued`, or `async-erc7540`) from `vault_get`/`vault_build_request_deposit`/`vault_build_request_redeem` before assuming a deposit or redeem transaction is the whole flow — two of the three values require a follow-up step (see `deposit-into-vault` and `redeem-from-vault`)
 
 ## Wallet Safety
 
@@ -88,13 +92,13 @@ Recommended signer capability surface:
 
 Runtimes may expose those capabilities through environment variables, session state, MCP tools, SDK injection, or policy tokens. The important part is that skills receive signer scope and wallet context without needing raw key material in the prompt surface.
 
-When a skill can return unsigned transaction payloads, intent data, or execution plans, prefer that pattern over having the skill directly sign and broadcast.
+When a skill can return unsigned transaction payloads (as every MCP vault tool does) or an execution plan, prefer that pattern over having the skill directly sign and broadcast.
 
 ## History Caveat
 
 Vault history may come from different sources depending on the runtime:
 
-- subgraph-backed history
+- the MCP tool `vault_request_status`, backed by the vault subgraph — the canonical source for pending/claimable deposit and redeem requests on async vaults
 - runtime-persisted ERC-4626 wallet history
 
 Skills should state which source they used and should not imply completeness unless the source is authoritative for that runtime.
